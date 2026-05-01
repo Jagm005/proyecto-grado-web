@@ -748,6 +748,16 @@ function AssetDetail({ asset }) {
           </span>
         </div>
       ))}
+      {asset.photoBase64 && (
+        <div style={{ marginTop: 14 }}>
+          <p className="text-sm text-muted" style={{ marginBottom: 6 }}>Foto del activo</p>
+          <img
+            src={`data:image/jpeg;base64,${asset.photoBase64}`}
+            alt="Foto del activo"
+            style={{ width: '100%', borderRadius: 8, objectFit: 'cover', maxHeight: 300 }}
+          />
+        </div>
+      )}
     </div>
   )
 }
