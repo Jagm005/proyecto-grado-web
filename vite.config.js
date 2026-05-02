@@ -21,7 +21,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://18.223.120.46:3000',
+        target: 'https://inventario-ucp.duckdns.org',
         changeOrigin: true,
       },
     },

@@ -5,7 +5,7 @@ import { toCamel, toSnake } from './theme.js'
 // En desarrollo local:        VITE_BACKEND_URL no definido → fallback al EC2
 // ?? (nullish) preserva el string vacío; || lo descartaría como falsy
 const BASE_URL =
-  import.meta.env.VITE_BACKEND_URL ?? 'http://18.223.120.46:3000'
+  import.meta.env.VITE_BACKEND_URL ?? 'https://inventario-ucp.duckdns.org'
 
 const TOKEN_KEY = 'inventario_token'
 
