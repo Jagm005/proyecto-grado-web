@@ -15,6 +15,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    assetsDir: '_static',  // evita conflicto con la ruta SPA /assets
   },
   server: {
     port: 5173,

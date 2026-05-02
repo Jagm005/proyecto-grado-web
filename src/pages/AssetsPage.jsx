@@ -43,6 +43,7 @@ const EMPTY_ASSET = {
   state: 'activo',
   observations: '',
   program: '',
+  photoBase64: '',
 }
 
 export default function AssetsPage() {
@@ -112,6 +113,7 @@ export default function AssetsPage() {
       state: asset.state,
       observations: asset.observations || '',
       program: asset.program,
+      photoBase64: asset.photoBase64 || '',
     })
     setFormErr(null)
     setEditTarget(asset)
@@ -155,6 +157,7 @@ export default function AssetsPage() {
         state: form.state,
         observations: form.observations.trim(),
         program: form.program.trim(),
+        ...(form.photoBase64 ? { photoBase64: form.photoBase64 } : {}),
       }
 
       if (isEdit) {
@@ -711,6 +714,43 @@ function AssetFormModal({ open, onClose, title, form, setForm, formErr, saving, 
           value={form.observations}
           onChange={(e) => setForm((f) => ({ ...f, observations: e.target.value }))}
         />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label"><IconPhoto size={14} style={{ marginRight: 4 }} />Foto del activo</label>
+        <input
+          type="file"
+          accept="image/*"
+          className="form-input"
+          style={{ paddingTop: 6 }}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (!file) return
+            const reader = new FileReader()
+            reader.onload = () => {
+              const b64 = reader.result.split(',')[1]
+              setForm((f) => ({ ...f, photoBase64: b64 }))
+            }
+            reader.readAsDataURL(file)
+          }}
+        />
+        {form.photoBase64 && (
+          <div style={{ marginTop: 8 }}>
+            <img
+              src={`data:image/jpeg;base64,${form.photoBase64}`}
+              alt="Vista previa"
+              style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 6 }}
+            />
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              style={{ marginTop: 4, color: 'var(--error)' }}
+              onClick={() => setForm((f) => ({ ...f, photoBase64: '' }))}
+            >
+              Quitar foto
+            </button>
+          </div>
+        )}
       </div>
     </Modal>
   )
