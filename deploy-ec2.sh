@@ -89,7 +89,7 @@ ssh -i "$PEM_KEY" -o StrictHostKeyChecking=no "$EC2_USER@$EC2_HOST" \
 echo ""
 echo "======================================================"
 echo " Despliegue completado."
-echo " URL: http://$EC2_HOST"
+echo " URL: https://inventario-ucp.duckdns.org"
 echo "======================================================"
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -103,12 +103,17 @@ echo "======================================================"
 #     sudo cp nginx/inventario.conf /etc/nginx/conf.d/inventario.conf
 #     sudo nginx -t && sudo systemctl enable nginx && sudo systemctl start nginx
 #
-#  3. Abrir puerto 80 en el Security Group de AWS
-#     (EC2 → Security Groups → Inbound rules → Add rule → HTTP → 0.0.0.0/0)
+#  3. Abrir puertos 80 y 443 en el Security Group de AWS:
+#     EC2 → Security Groups → Inbound rules:
+#       HTTP  (80)  → 0.0.0.0/0
+#       HTTPS (443) → 0.0.0.0/0
 #
 #  4. (Opcional) Puerto 3000 puede cerrarse al público una vez Nginx proxee /api.
 #
-#  5. Para HTTPS gratuito con Let's Encrypt:
+#  5. Emitir certificado TLS gratuito (una sola vez):
 #     sudo apt install -y certbot python3-certbot-nginx
-#     sudo certbot --nginx -d tudominio.com
+#     sudo certbot --nginx -d inventario-ucp.duckdns.org
+#
+#     Certbot editará inventario.conf automáticamente y habilitará
+#     la renovación automática vía systemd timer (certbot.timer).
 # ──────────────────────────────────────────────────────────────────────────────
