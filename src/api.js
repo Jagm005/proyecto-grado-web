@@ -7,19 +7,41 @@ import { toCamel, toSnake } from './theme.js'
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL ?? 'http://18.223.120.46:3000'
 
+const TOKEN_KEY = 'inventario_token'
+
+export const saveToken  = (t) => localStorage.setItem(TOKEN_KEY, t)
+export const clearToken = ()  => localStorage.removeItem(TOKEN_KEY)
+export const getToken   = ()  => localStorage.getItem(TOKEN_KEY) ?? null
+
 const client = axios.create({
   baseURL: BASE_URL,
   timeout: 12000,
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Normalizar respuestas a camelCase
+// Adjuntar JWT en cada petición
+client.interceptors.request.use((config) => {
+  const token = getToken()
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+// Normalizar respuestas a camelCase + manejar 401 (token expirado)
 client.interceptors.response.use(
   (res) => {
     res.data = toCamel(res.data)
     return res
   },
-  (err) => Promise.reject(err),
+  (err) => {
+    if (err.response?.status === 401) {
+      clearToken()
+      // Emitir evento para que AuthContext limpie el usuario
+      window.dispatchEvent(new CustomEvent('auth:expired'))
+    }
+    return Promise.reject(err)
+  },
 )
 
 // ── Auth ──────────────────────────────────────────────────────────────────────

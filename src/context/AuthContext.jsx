@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
-import { apiLogin, apiGoogleLogin } from '../api.js'
+import { apiLogin, apiGoogleLogin, saveToken, clearToken, getToken } from '../api.js'
 
 const AuthCtx = createContext(null)
 
@@ -8,7 +8,8 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('inventario_user')
-      return saved ? JSON.parse(saved) : null
+      // Solo restaurar la sesión si también existe un token válido
+      return saved && getToken() ? JSON.parse(saved) : null
     } catch {
       return null
     }
@@ -20,15 +21,25 @@ export function AuthProvider({ children }) {
       localStorage.setItem('inventario_user', JSON.stringify(currentUser))
     } else {
       localStorage.removeItem('inventario_user')
+      clearToken()
     }
   }, [currentUser])
+
+  // Limpiar sesión cuando el token expira (interceptor de axios emite este evento)
+  useEffect(() => {
+    const onExpired = () => setCurrentUser(null)
+    window.addEventListener('auth:expired', onExpired)
+    return () => window.removeEventListener('auth:expired', onExpired)
+  }, [])
 
   // ── login con credenciales ──────────────────────────────────────────────────
   // Retorna null si exitoso; string con prefijo LOCK:secs | WARN:rest | INFO:msg
   const login = useCallback(async (identifier, password) => {
     try {
       const res = await apiLogin(identifier.trim(), password)
-      setCurrentUser(res.data)
+      const { token, user } = res.data
+      saveToken(token)
+      setCurrentUser(user)
       return null
     } catch (err) {
       const body = err.response?.data
@@ -63,7 +74,9 @@ export function AuthProvider({ children }) {
           return
         }
         const res = await apiGoogleLogin(email)
-        setCurrentUser(res.data)
+        const { token, user } = res.data
+        saveToken(token)
+        setCurrentUser(user)
         googleResolve(null)
       } catch (err) {
         const body = err.response?.data
