@@ -728,8 +728,8 @@ function AssetFormModal({ open, onClose, title, form, setForm, formErr, saving, 
             if (!file) return
             const reader = new FileReader()
             reader.onload = () => {
-              const b64 = reader.result.split(',')[1]
-              setForm((f) => ({ ...f, photoBase64: b64 }))
+              // Guardamos la data URI completa (incluye tipo MIME)
+              setForm((f) => ({ ...f, photoBase64: reader.result }))
             }
             reader.readAsDataURL(file)
           }}
@@ -737,7 +737,7 @@ function AssetFormModal({ open, onClose, title, form, setForm, formErr, saving, 
         {form.photoBase64 && (
           <div style={{ marginTop: 8 }}>
             <img
-              src={`data:image/jpeg;base64,${form.photoBase64}`}
+              src={form.photoBase64.startsWith('data:') ? form.photoBase64 : `data:image/jpeg;base64,${form.photoBase64}`}
               alt="Vista previa"
               style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 6 }}
             />
@@ -792,7 +792,7 @@ function AssetDetail({ asset }) {
         <div style={{ marginTop: 14 }}>
           <p className="text-sm text-muted" style={{ marginBottom: 6 }}>Foto del activo</p>
           <img
-            src={`data:image/jpeg;base64,${asset.photoBase64}`}
+            src={asset.photoBase64?.startsWith('data:') ? asset.photoBase64 : `data:image/jpeg;base64,${asset.photoBase64}`}
             alt="Foto del activo"
             style={{ width: '100%', borderRadius: 8, objectFit: 'cover', maxHeight: 300 }}
           />
